@@ -1,6 +1,6 @@
 # Pocket Notes
 
-Pocket Notes is a small server-rendered daily notes app built for constrained browsers and e-ink devices. It keeps the browser side simple, stores users and notes in a single SQLite database, and can back up that runtime data to Google Drive with rclone.
+Pocket Notes is a small server-rendered daily notes app built for constrained browsers and e-ink devices. It keeps the browser side simple, stores users and notes in a single SQLite database, and can back up exported SQLite snapshots to Google Drive with Duplicati.
 
 ## Features
 
@@ -18,7 +18,7 @@ Pocket Notes is a small server-rendered daily notes app built for constrained br
 - Users can change their own password from the Profile page.
 - Responsive Flexbox layout aimed at narrow screens and e-ink readers.
 - Docker setup with one mounted runtime directory.
-- Optional Google Drive backup through rclone.
+- Optional Google Drive backup through Duplicati.
 
 ## Requirements
 
@@ -35,7 +35,7 @@ npm start
 
 The app listens on `http://localhost:3000` by default.
 
-On first start, the server creates `runtime-data/`, copies `runtime-data/sync/rclone.conf.example`, and creates `runtime-data/pocket-notes.sqlite` with this temporary admin account:
+On first start, the server creates `runtime-data/`, creates `runtime-data/backup-snapshots/`, and creates `runtime-data/pocket-notes.sqlite` with this temporary admin account:
 
 - Username: `admin`
 - Password: `changeme`
@@ -64,10 +64,11 @@ Runtime data lives under `runtime-data/` when running locally. That directory is
 ```text
 runtime-data/
   pocket-notes.sqlite
-  sync/
-    rclone.conf
-    rclone.conf.example
+  backup-snapshots/
+    pocket-notes-2026-04-18T20-00-00-000Z.sqlite
 ```
+
+When you run with Docker Compose, the services use named Docker volumes instead: `runtime-data`, `duplicati-config`, and `duplicati-storage`.
 
 Saving an empty note clears the note row for that day.
 
@@ -81,28 +82,32 @@ docker compose up --build
 
 The container uses one mount:
 
-- `./runtime-data:/app/runtime-data`
+- `runtime-data:/app/runtime-data`
 
-That one mount holds the SQLite database and the sync config.
+The app and snapshot-export services share the `runtime-data` volume. If you enable backups, Duplicati also uses the `duplicati-config` and `duplicati-storage` volumes.
 
 The default container port is `3000`. Override the host port with the `PORT` environment variable.
 
 Failed-login protection defaults to 8 bad sign-in attempts per 15 minutes for each client IP. Override that with `LOGIN_RATE_LIMIT_MAX_ATTEMPTS` and `LOGIN_RATE_LIMIT_WINDOW_SECONDS` if needed.
 
-## Google Drive Backup With rclone
+Snapshot exports default to every 15 minutes and keep the newest 14 files. Override that with `BACKUP_SNAPSHOT_INTERVAL_SECONDS` and `BACKUP_SNAPSHOT_KEEP_COUNT` if needed.
 
-1. Start the app once so it creates `runtime-data/` and `runtime-data/sync/rclone.conf.example`.
-2. Copy `runtime-data/sync/rclone.conf.example` to `runtime-data/sync/rclone.conf`.
-3. Replace the placeholder values with your real rclone Google Drive remote config.
-4. Start the sync profile:
+## Google Drive Backup With Duplicati
+
+1. Set a Duplicati web UI password with `DUPLICATI_WEBSERVICE_PASSWORD` and a settings encryption key with `DUPLICATI_SETTINGS_ENCRYPTION_KEY`.
+2. Start the backup profile:
 
 ```bash
-docker compose --profile sync up -d
+docker compose --profile backup up -d
 ```
 
-The sync container mirrors `runtime-data` to `gdrive:pocket-notes` every 15 minutes by default, excluding the local `sync` configuration directory.
+3. Open the Duplicati web UI at `http://localhost:8200` or your `DUPLICATI_PORT` override.
+4. Create a new backup job in Duplicati and choose Google Drive as the destination.
+5. Use `/source/backup-snapshots` as the source path inside Duplicati. That points to exported SQLite snapshots, not the live database files.
 
-Override the interval with `RCLONE_SYNC_INTERVAL`, measured in seconds.
+The `backup-snapshot` service creates timestamped SQLite snapshots in `runtime-data/backup-snapshots/` on the interval you configure. Duplicati then uploads those clean snapshots to Google Drive.
+
+Duplicati stores its UI configuration in the `duplicati-config` Docker volume and any local backup storage it needs in the `duplicati-storage` Docker volume.
 
 ## PocketBook-Friendly Choices
 

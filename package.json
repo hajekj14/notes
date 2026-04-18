@@ -5,7 +5,9 @@
   "description": "Server-rendered daily notes app for constrained browsers and e-ink devices.",
   "main": "src/server.js",
   "scripts": {
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "backup:snapshot": "node src/backup-snapshot.js",
+    "backup:snapshot:watch": "node src/backup-snapshot.js watch"
   },
   "engines": {
     "node": ">=24"

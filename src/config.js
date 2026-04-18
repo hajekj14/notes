@@ -11,6 +11,8 @@ function getConfig() {
   const dataRoot = path.resolve(process.env.NOTES_DATA_ROOT || path.join(appRoot, "runtime-data"));
   const loginRateLimitMaxAttempts = parsePositiveInteger(process.env.LOGIN_RATE_LIMIT_MAX_ATTEMPTS, 8);
   const loginRateLimitWindowSeconds = parsePositiveInteger(process.env.LOGIN_RATE_LIMIT_WINDOW_SECONDS, 900);
+  const backupSnapshotIntervalSeconds = parsePositiveInteger(process.env.BACKUP_SNAPSHOT_INTERVAL_SECONDS, 900);
+  const backupSnapshotKeepCount = parsePositiveInteger(process.env.BACKUP_SNAPSHOT_KEEP_COUNT, 14);
 
   return {
     appRoot,
@@ -24,11 +26,13 @@ function getConfig() {
       maxAttempts: loginRateLimitMaxAttempts,
       windowMs: loginRateLimitWindowSeconds * 1000
     },
+    backupSnapshots: {
+      intervalMs: backupSnapshotIntervalSeconds * 1000,
+      keepCount: backupSnapshotKeepCount
+    },
     paths: {
-      syncRoot: path.join(dataRoot, "sync"),
       databaseFile: path.join(dataRoot, "pocket-notes.sqlite"),
-      rcloneExampleFile: path.join(dataRoot, "sync", "rclone.conf.example"),
-      repoRcloneExampleFile: path.join(appRoot, "data", "config", "rclone.conf.example")
+      backupSnapshotRoot: path.join(dataRoot, "backup-snapshots")
     }
   };
 }

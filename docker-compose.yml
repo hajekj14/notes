@@ -11,8 +11,10 @@ services:
       SESSION_SECURE: ${SESSION_SECURE:-false}
       LOGIN_RATE_LIMIT_MAX_ATTEMPTS: ${LOGIN_RATE_LIMIT_MAX_ATTEMPTS:-8}
       LOGIN_RATE_LIMIT_WINDOW_SECONDS: ${LOGIN_RATE_LIMIT_WINDOW_SECONDS:-900}
+      BACKUP_SNAPSHOT_INTERVAL_SECONDS: ${BACKUP_SNAPSHOT_INTERVAL_SECONDS:-900}
+      BACKUP_SNAPSHOT_KEEP_COUNT: ${BACKUP_SNAPSHOT_KEEP_COUNT:-14}
     volumes:
-      - ./runtime-data:/app/runtime-data
+      - runtime-data:/app/runtime-data
     restart: unless-stopped
     healthcheck:
       test:
@@ -27,25 +29,46 @@ services:
       retries: 3
       start_period: 10s
 
-  rclone-sync:
-    image: rclone/rclone:latest
+  backup-snapshot:
+    build:
+      context: .
     profiles:
-      - sync
+      - backup
     depends_on:
       app:
         condition: service_healthy
+    environment:
+      NOTES_DATA_ROOT: /app/runtime-data
+      BACKUP_SNAPSHOT_INTERVAL_SECONDS: ${BACKUP_SNAPSHOT_INTERVAL_SECONDS:-900}
+      BACKUP_SNAPSHOT_KEEP_COUNT: ${BACKUP_SNAPSHOT_KEEP_COUNT:-14}
     volumes:
-      - ./runtime-data:/data
-    entrypoint:
-      - /bin/sh
-      - -c
-    command: >
-      mkdir -p /data/sync &&
-      if [ ! -f /data/sync/rclone.conf ]; then
-        echo "Missing /data/sync/rclone.conf. Copy data/config/rclone.conf.example first." >&2;
-        exit 1;
-      fi;
-      while true; do
-        rclone sync /data gdrive:pocket-notes --config /data/sync/rclone.conf --exclude 'sync/**' --create-empty-src-dirs;
-        sleep ${RCLONE_SYNC_INTERVAL:-900};
-      done
+      - runtime-data:/app/runtime-data
+    command: ["node", "src/backup-snapshot.js", "watch"]
+    restart: unless-stopped
+
+  duplicati:
+    image: lscr.io/linuxserver/duplicati:latest
+    profiles:
+      - backup
+    depends_on:
+      app:
+        condition: service_healthy
+    environment:
+      PUID: ${PUID:-1000}
+      PGID: ${PGID:-1000}
+      TZ: ${TZ:-Etc/UTC}
+      SETTINGS_ENCRYPTION_KEY: ${DUPLICATI_SETTINGS_ENCRYPTION_KEY:-change-this-settings-key}
+      DUPLICATI__WEBSERVICE_PASSWORD: ${DUPLICATI_WEBSERVICE_PASSWORD:-change-this-web-password}
+      CLI_ARGS: ${DUPLICATI_CLI_ARGS:-}
+    volumes:
+      - duplicati-config:/config
+      - duplicati-storage:/backups
+      - runtime-data:/source:ro
+    ports:
+      - "${DUPLICATI_PORT:-8200}:8200"
+    restart: unless-stopped
+
+volumes:
+  runtime-data:
+  duplicati-config:
+  duplicati-storage:
