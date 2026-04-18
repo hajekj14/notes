@@ -14,7 +14,7 @@ services:
       BACKUP_SNAPSHOT_INTERVAL_SECONDS: ${BACKUP_SNAPSHOT_INTERVAL_SECONDS:-900}
       BACKUP_SNAPSHOT_KEEP_COUNT: ${BACKUP_SNAPSHOT_KEEP_COUNT:-14}
     volumes:
-      - runtime-data:/app/runtime-data
+      - notes:/app/runtime-data
     restart: unless-stopped
     healthcheck:
       test:
@@ -42,7 +42,7 @@ services:
       BACKUP_SNAPSHOT_INTERVAL_SECONDS: ${BACKUP_SNAPSHOT_INTERVAL_SECONDS:-900}
       BACKUP_SNAPSHOT_KEEP_COUNT: ${BACKUP_SNAPSHOT_KEEP_COUNT:-14}
     volumes:
-      - runtime-data:/app/runtime-data
+      - notes:/app/runtime-data
     command: ["node", "src/backup-snapshot.js", "watch"]
     restart: unless-stopped
 
@@ -63,12 +63,12 @@ services:
     volumes:
       - duplicati-config:/config
       - duplicati-storage:/backups
-      - runtime-data:/source:ro
+      - notes:/source:ro
     ports:
       - "${DUPLICATI_PORT:-8200}:8200"
     restart: unless-stopped
 
 volumes:
-  runtime-data:
+  notes:
   duplicati-config:
   duplicati-storage:

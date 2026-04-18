@@ -68,7 +68,7 @@ runtime-data/
     pocket-notes-2026-04-18T20-00-00-000Z.sqlite
 ```
 
-When you run with Docker Compose, the services use named Docker volumes instead: `runtime-data`, `duplicati-config`, and `duplicati-storage`.
+When you run with Docker Compose, the services use named Docker volumes instead: `notes`, `duplicati-config`, and `duplicati-storage`.
 
 Saving an empty note clears the note row for that day.
 
@@ -82,9 +82,9 @@ docker compose up --build
 
 The container uses one mount:
 
-- `runtime-data:/app/runtime-data`
+- `notes:/app/runtime-data`
 
-The app and snapshot-export services share the `runtime-data` volume. If you enable backups, Duplicati also uses the `duplicati-config` and `duplicati-storage` volumes.
+The app and snapshot-export services share the `notes` volume. If you enable backups, Duplicati also uses the `duplicati-config` and `duplicati-storage` volumes.
 
 The default container port is `3000`. Override the host port with the `PORT` environment variable.
 
