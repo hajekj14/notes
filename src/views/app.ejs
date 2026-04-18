@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><%= pageTitle %></title>
+    <link rel="stylesheet" href="/static/style.css">
+  </head>
+  <body>
+    <div class="page-shell">
+      <main class="page-content">
+        <header class="topbar">
+          <div class="topbar-copy">
+            <p class="eyebrow">PocketBook-ready daily notes</p>
+            <h1><%= appTitle %></h1>
+            <p class="lede">The default page stays focused on writing or editing one date at a time.</p>
+          </div>
+
+          <div class="topbar-actions">
+            <nav class="primary-nav" aria-label="Primary">
+              <% primaryNav.forEach(function(item) { %>
+                <a class="nav-link <%= item.active ? 'is-active' : '' %>" href="<%= item.href %>"><%= item.label %></a>
+              <% }) %>
+            </nav>
+
+            <form method="post" action="/logout">
+              <button type="submit" class="button button-secondary">Log out</button>
+            </form>
+          </div>
+        </header>
+
+        <section class="editor-card">
+          <div class="editor-header">
+            <div>
+              <p class="eyebrow">Signed in as <strong><%= currentUser.displayName %></strong></p>
+              <h2><%= noteDateLabel %></h2>
+              <p class="status-line"><%= noteStatus %></p>
+              <p class="status-line"><%= noteOwnershipLabel %></p>
+            </div>
+
+            <div class="editor-header__actions">
+              <a href="/notes" class="button button-secondary">Browse saved notes</a>
+              <span class="info-chip">One note per day</span>
+            </div>
+          </div>
+
+          <% if (flash) { %>
+            <div class="flash flash-<%= flash.kind %>"><%= flash.message %></div>
+          <% } %>
+
+          <form method="get" action="/" class="date-form">
+            <label class="field field-date">
+              <span>Date</span>
+              <input
+                type="text"
+                name="date"
+                value="<%= selectedDate.value %>"
+                inputmode="numeric"
+                pattern="\d{4}-\d{2}-\d{2}"
+                placeholder="YYYY-MM-DD"
+                required
+              >
+            </label>
+
+            <button type="submit" class="button button-secondary">Open date</button>
+          </form>
+
+          <form method="post" action="/notes/save" class="stacked-form">
+            <input type="hidden" name="date" value="<%= selectedDate.value %>">
+            <% if (note.id) { %>
+              <input type="hidden" name="noteId" value="<%= note.id %>">
+            <% } %>
+
+            <label class="field">
+              <span class="field-label-row">
+                <span>Note</span>
+                <a href="#markdown-help" class="help-trigger">Markdown help</a>
+              </span>
+              <textarea name="content" placeholder="Write the note for this day here."><%= note.content %></textarea>
+            </label>
+
+            <div class="form-actions">
+              <button type="submit">Save note</button>
+              <p class="form-hint">Write plain Markdown here. The notes feed renders it on the server. Saving an empty note clears that day from the notes feed.</p>
+            </div>
+          </form>
+        </section>
+
+        <section class="share-card card-block">
+          <div class="share-card__head">
+            <div>
+              <p class="eyebrow">Sharing</p>
+              <h2>Note access</h2>
+              <% if (!sharePanel.readyToShare) { %>
+                <p class="status-line">Save the note first, then choose which users can open and edit it.</p>
+              <% } else if (sharePanel.canManage) { %>
+                <p class="status-line">Users selected here can view and edit this shared note.</p>
+              <% } else { %>
+                <p class="status-line">Only the note owner can change who has access.</p>
+              <% } %>
+            </div>
+          </div>
+
+          <% if (sharePanel.canManage) { %>
+            <% if (sharePanel.hasOptions) { %>
+              <form method="post" action="/notes/share" class="stacked-form">
+                <input type="hidden" name="noteId" value="<%= note.id %>">
+
+                <div class="sharing-list">
+                  <% sharePanel.options.forEach(function(option) { %>
+                    <label class="sharing-list__item">
+                      <input type="checkbox" name="sharedUserIds" value="<%= option.id %>" <%= option.isShared ? 'checked' : '' %>>
+                      <span>
+                        <strong><%= option.displayName %></strong>
+                        <span class="status-line">@<%= option.username %><%= option.isAdmin ? ' · admin' : '' %></span>
+                      </span>
+                    </label>
+                  <% }) %>
+                </div>
+
+                <div class="form-actions">
+                  <button type="submit">Update sharing</button>
+                </div>
+              </form>
+            <% } else { %>
+              <p class="status-line">No other users exist yet. An admin can add them from the Admin page.</p>
+            <% } %>
+          <% } else if (!note.isOwned && note.exists) { %>
+            <p class="status-line">This note is shared with you by <strong><%= note.ownerDisplayName %></strong>.</p>
+          <% } %>
+        </section>
+
+        <section id="markdown-help" class="modal-shell" aria-labelledby="markdown-help-title">
+          <a href="#" class="modal-shell__backdrop" aria-label="Close markdown help"></a>
+
+          <div class="modal-card card-block" role="dialog" aria-modal="true">
+            <div class="modal-card__head">
+              <div>
+                <p class="eyebrow">Quick reference</p>
+                <h2 id="markdown-help-title">Markdown help</h2>
+                <p class="status-line">Write plain Markdown in the editor. The notes page renders it on the server.</p>
+              </div>
+
+              <a href="#" class="button button-secondary button-small">Close</a>
+            </div>
+
+            <div class="markdown-help-grid">
+              <article class="markdown-help-item">
+                <h3>Headings</h3>
+                <pre><code># Main title
+## Section title</code></pre>
+              </article>
+
+              <article class="markdown-help-item">
+                <h3>Emphasis</h3>
+                <pre><code>**bold**
+*italic*</code></pre>
+              </article>
+
+              <article class="markdown-help-item">
+                <h3>Lists</h3>
+                <pre><code>- first item
+- second item
+
+1. ordered item</code></pre>
+              </article>
+
+              <article class="markdown-help-item">
+                <h3>Links</h3>
+                <pre><code>[Pocket Notes](https://example.com)</code></pre>
+              </article>
+
+              <article class="markdown-help-item">
+                <h3>Quote</h3>
+                <pre><code>> Quoted line</code></pre>
+              </article>
+
+              <article class="markdown-help-item">
+                <h3>Code</h3>
+                <pre><code>`inline code`
+
+```
+code block
+```</code></pre>
+              </article>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

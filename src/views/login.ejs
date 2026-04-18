@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><%= pageTitle %> · <%= appTitle %></title>
+    <link rel="stylesheet" href="/static/style.css">
+  </head>
+  <body>
+    <main class="auth-shell">
+      <section class="auth-card">
+        <p class="eyebrow">Simple daily notes for small browsers</p>
+        <h1><%= appTitle %></h1>
+        <p class="lede">Sign in with an account created by an admin.</p>
+
+        <% if (flash) { %>
+          <div class="flash flash-<%= flash.kind %>"><%= flash.message %></div>
+        <% } %>
+
+        <form method="post" action="/login" class="stacked-form">
+          <label class="field">
+            <span>Username</span>
+            <input type="text" name="username" autocomplete="username" required>
+          </label>
+
+          <label class="field">
+            <span>Password</span>
+            <input type="password" name="password" autocomplete="current-password" required>
+          </label>
+
+          <button type="submit">Sign in</button>
+        </form>
+
+        <p class="form-hint">On a fresh database, the seeded admin login is <strong>admin</strong> with password <strong>changeme</strong>.</p>
+      </section>
+    </main>
+  </body>
+</html>

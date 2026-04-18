@@ -1,0 +1,21 @@
+{
+  "name": "pocket-notes",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Server-rendered daily notes app for constrained browsers and e-ink devices.",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cookie-session": "^2.1.0",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "markdown-it": "^14.1.0",
+    "morgan": "^1.10.0"
+  }
+}

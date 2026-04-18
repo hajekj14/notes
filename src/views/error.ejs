@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><%= pageTitle %> · <%= appTitle %></title>
+    <link rel="stylesheet" href="/static/style.css">
+  </head>
+  <body>
+    <main class="auth-shell">
+      <section class="error-card">
+        <p class="eyebrow">Server response</p>
+        <h1><%= heading %></h1>
+        <p class="lede"><%= message %></p>
+
+        <% if (currentUser) { %>
+          <p><a href="/" class="ghost-link">Return to the editor</a></p>
+        <% } else { %>
+          <p><a href="/login" class="ghost-link">Return to sign in</a></p>
+        <% } %>
+      </section>
+    </main>
+  </body>
+</html>

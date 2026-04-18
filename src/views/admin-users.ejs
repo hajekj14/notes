@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><%= pageTitle %></title>
+    <link rel="stylesheet" href="/static/style.css">
+  </head>
+  <body>
+    <div class="page-shell">
+      <main class="page-content">
+        <header class="topbar">
+          <div class="topbar-copy">
+            <p class="eyebrow">Admin tools</p>
+            <h1><%= appTitle %></h1>
+            <p class="lede">Create users and control who can administer the application.</p>
+          </div>
+
+          <div class="topbar-actions">
+            <nav class="primary-nav" aria-label="Primary">
+              <% primaryNav.forEach(function(item) { %>
+                <a class="nav-link <%= item.active ? 'is-active' : '' %>" href="<%= item.href %>"><%= item.label %></a>
+              <% }) %>
+            </nav>
+
+            <form method="post" action="/logout">
+              <button type="submit" class="button button-secondary">Log out</button>
+            </form>
+          </div>
+        </header>
+
+        <% if (flash) { %>
+          <div class="flash flash-<%= flash.kind %>"><%= flash.message %></div>
+        <% } %>
+
+        <section class="admin-layout">
+          <section class="card-block admin-export-card">
+            <p class="eyebrow">Database export</p>
+            <h2>Download SQLite snapshot</h2>
+            <p class="status-line">Download a fresh SQLite snapshot for backup or manual inspection. This export is available only to admins.</p>
+
+            <div class="form-actions admin-form">
+              <a href="<%= databaseDownloadHref %>" class="button">Download database</a>
+            </div>
+          </section>
+
+          <section class="card-block admin-create-card">
+            <p class="eyebrow">Create user</p>
+            <h2>Register a new account</h2>
+            <form method="post" action="/admin/users" class="stacked-form admin-form">
+              <label class="field">
+                <span>Username</span>
+                <input type="text" name="username" placeholder="username" required>
+              </label>
+
+              <label class="field">
+                <span>Display name</span>
+                <input type="text" name="displayName" placeholder="Display name" required>
+              </label>
+
+              <label class="field">
+                <span>Password</span>
+                <input type="password" name="password" minlength="6" required>
+              </label>
+
+              <label class="sharing-list__item admin-checkbox">
+                <input type="checkbox" name="isAdmin">
+                <span>Grant admin access immediately</span>
+              </label>
+
+              <div class="form-actions">
+                <button type="submit">Create user</button>
+              </div>
+            </form>
+          </section>
+
+          <section class="card-block admin-users-card">
+            <p class="eyebrow">User list</p>
+            <h2>Existing accounts</h2>
+
+            <div class="user-list">
+              <% users.forEach(function(user) { %>
+                <article class="user-card">
+                  <div class="user-card__head">
+                    <div>
+                      <h3><%= user.displayName %></h3>
+                      <p class="status-line">@<%= user.username %> · <%= user.ownedNoteCount %> own note<%= user.ownedNoteCount === 1 ? '' : 's' %></p>
+                    </div>
+
+                    <div class="status-badges">
+                      <% if (user.isAdmin) { %>
+                        <span class="info-chip">Admin</span>
+                      <% } else { %>
+                        <span class="pill">User</span>
+                      <% } %>
+                    </div>
+                  </div>
+
+                  <form method="post" action="/admin/users/<%= user.id %>/admin" class="form-actions">
+                    <input type="hidden" name="isAdmin" value="<%= user.nextAdminValue %>">
+                    <button type="submit" class="button button-secondary" <%= user.canToggleAdmin ? '' : 'disabled' %>><%= user.adminActionLabel %></button>
+                  </form>
+                </article>
+              <% }) %>
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

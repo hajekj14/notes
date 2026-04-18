@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><%= pageTitle %></title>
+    <link rel="stylesheet" href="/static/style.css">
+  </head>
+  <body>
+    <div class="page-shell">
+      <main class="page-content">
+        <header class="topbar">
+          <div class="topbar-copy">
+            <p class="eyebrow">Simple note browsing</p>
+            <h1><%= appTitle %></h1>
+            <p class="lede">A paged stream of saved notes, newest first, with no browser JavaScript required.</p>
+          </div>
+
+          <div class="topbar-actions">
+            <nav class="primary-nav" aria-label="Primary">
+              <% primaryNav.forEach(function(item) { %>
+                <a class="nav-link <%= item.active ? 'is-active' : '' %>" href="<%= item.href %>"><%= item.label %></a>
+              <% }) %>
+            </nav>
+
+            <form method="post" action="/logout">
+              <button type="submit" class="button button-secondary">Log out</button>
+            </form>
+          </div>
+        </header>
+
+        <% if (flash) { %>
+          <div class="flash flash-<%= flash.kind %>"><%= flash.message %></div>
+        <% } %>
+
+        <section class="feed-toolbar card-block">
+          <div class="feed-toolbar__head">
+            <div>
+              <p class="eyebrow">Filters</p>
+              <h2>Saved notes</h2>
+              <p class="status-line"><%= filterSummary %></p>
+            </div>
+            <a href="<%= filters.clearHref %>" class="ghost-link">Show all notes</a>
+          </div>
+
+          <div class="filter-strip">
+            <a class="filter-link <%= !filters.hasYear ? 'is-active' : '' %>" href="<%= filters.clearHref %>">All</a>
+            <% filters.years.forEach(function(year) { %>
+              <a class="filter-link <%= year.active ? 'is-active' : '' %>" href="<%= year.href %>"><%= year.label %></a>
+            <% }) %>
+          </div>
+
+          <% if (filters.hasYear) { %>
+            <div class="filter-strip">
+              <a class="filter-link <%= !filters.hasMonth ? 'is-active' : '' %>" href="<%= filters.wholeYearHref %>">Whole year</a>
+              <% filters.months.forEach(function(month) { %>
+                <a class="filter-link <%= month.active ? 'is-active' : '' %>" href="<%= month.href %>">
+                  <span><%= month.label %></span>
+                  <small><%= month.shortLabel %></small>
+                </a>
+              <% }) %>
+            </div>
+          <% } %>
+        </section>
+
+        <% if (feed.items.length === 0) { %>
+          <section class="empty-card card-block">
+            <p class="eyebrow">No saved notes</p>
+            <h2>Nothing to show yet</h2>
+            <p class="lede">Create a note on the editor page and it will appear here in the feed.</p>
+            <p><a href="/" class="button button-secondary">Open editor</a></p>
+          </section>
+        <% } else { %>
+          <section class="feed-meta">
+            <p class="status-line">Showing <%= feed.rangeStart %> to <%= feed.rangeEnd %> of <%= feed.totalCount %> saved notes.</p>
+            <p class="status-line">Page <%= feed.currentPage %> of <%= feed.totalPages %>.</p>
+          </section>
+
+          <section class="feed-list">
+            <% feed.items.forEach(function(item) { %>
+              <article class="feed-card card-block">
+                <div class="feed-card__head">
+                  <div>
+                    <p class="eyebrow"><%= item.ownershipLabel %></p>
+                    <h2><a href="<%= item.viewHref %>" class="feed-card__title"><%= item.dateLabel %></a></h2>
+                    <p class="status-line"><%= item.statusLabel %></p>
+                  </div>
+                  <div class="feed-card__actions">
+                    <a href="<%= item.viewHref %>" class="button button-secondary button-small">View</a>
+                    <a href="<%= item.editHref %>" class="button button-secondary button-small">Edit</a>
+                  </div>
+                </div>
+
+                <% if (item.hasPreview) { %>
+                  <div class="feed-preview markdown-body"><%- item.previewHtml %></div>
+                  <% if (item.previewTruncated) { %>
+                    <p class="feed-preview__more"><a href="<%= item.viewHref %>" class="ghost-link">Open the full note</a></p>
+                  <% } %>
+                <% } else { %>
+                  <p class="feed-preview feed-preview--empty">Empty note</p>
+                <% } %>
+              </article>
+            <% }) %>
+          </section>
+
+          <nav class="pagination" aria-label="Feed pages">
+            <% if (feed.previousPageHref) { %>
+              <a href="<%= feed.previousPageHref %>" class="button button-secondary">Newer notes</a>
+            <% } else { %>
+              <span class="button button-secondary is-disabled">Newer notes</span>
+            <% } %>
+
+            <% if (feed.nextPageHref) { %>
+              <a href="<%= feed.nextPageHref %>" class="button button-secondary">Older notes</a>
+            <% } else { %>
+              <span class="button button-secondary is-disabled">Older notes</span>
+            <% } %>
+          </nav>
+        <% } %>
+      </main>
+    </div>
+  </body>
+</html>

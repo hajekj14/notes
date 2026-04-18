@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><%= pageTitle %></title>
+    <link rel="stylesheet" href="/static/style.css">
+  </head>
+  <body>
+    <div class="page-shell">
+      <main class="page-content">
+        <header class="topbar">
+          <div class="topbar-copy">
+            <p class="eyebrow">Profile setup</p>
+            <h1><%= appTitle %></h1>
+            <p class="lede">Manage your account settings separately from note editing.</p>
+          </div>
+
+          <div class="topbar-actions">
+            <nav class="primary-nav" aria-label="Primary">
+              <% primaryNav.forEach(function(item) { %>
+                <a class="nav-link <%= item.active ? 'is-active' : '' %>" href="<%= item.href %>"><%= item.label %></a>
+              <% }) %>
+            </nav>
+
+            <form method="post" action="/logout">
+              <button type="submit" class="button button-secondary">Log out</button>
+            </form>
+          </div>
+        </header>
+
+        <% if (flash) { %>
+          <div class="flash flash-<%= flash.kind %>"><%= flash.message %></div>
+        <% } %>
+
+        <section class="profile-layout">
+          <section class="profile-card card-block">
+            <div class="profile-card__head">
+              <div>
+                <p class="eyebrow">Account</p>
+                <h2>Profile</h2>
+                <p class="status-line">Signed in as <strong><%= currentUser.displayName %></strong> at @<%= currentUser.username %>.</p>
+              </div>
+
+              <div class="status-badges">
+                <% if (currentUser.isAdmin) { %>
+                  <span class="info-chip"><%= roleLabel %></span>
+                <% } else { %>
+                  <span class="pill"><%= roleLabel %></span>
+                <% } %>
+              </div>
+            </div>
+
+            <p class="status-line">Use this page for account setup and password changes without mixing those actions into note editing.</p>
+          </section>
+
+          <section class="account-card card-block">
+            <div class="account-card__head">
+              <div>
+                <p class="eyebrow">Security</p>
+                <h2>Change password</h2>
+                <p class="status-line">The current password is required before a new one is saved.</p>
+              </div>
+            </div>
+
+            <form method="post" action="/profile/password" class="stacked-form">
+              <label class="field">
+                <span>Current password</span>
+                <input type="password" name="currentPassword" autocomplete="current-password" required>
+              </label>
+
+              <label class="field">
+                <span>New password</span>
+                <input type="password" name="nextPassword" autocomplete="new-password" minlength="6" required>
+              </label>
+
+              <label class="field">
+                <span>Confirm new password</span>
+                <input type="password" name="confirmPassword" autocomplete="new-password" minlength="6" required>
+              </label>
+
+              <div class="form-actions">
+                <button type="submit">Change password</button>
+                <p class="form-hint">Use at least 6 characters. Pick something different from the current password.</p>
+              </div>
+            </form>
+          </section>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

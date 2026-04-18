@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><%= pageTitle %></title>
+    <link rel="stylesheet" href="/static/style.css">
+  </head>
+  <body>
+    <div class="page-shell">
+      <main class="page-content">
+        <header class="topbar">
+          <div class="topbar-copy">
+            <p class="eyebrow">Full note view</p>
+            <h1><%= appTitle %></h1>
+            <p class="lede">Rendered Markdown for one saved day.</p>
+          </div>
+
+          <div class="topbar-actions">
+            <nav class="primary-nav" aria-label="Primary">
+              <% primaryNav.forEach(function(item) { %>
+                <a class="nav-link <%= item.active ? 'is-active' : '' %>" href="<%= item.href %>"><%= item.label %></a>
+              <% }) %>
+            </nav>
+
+            <form method="post" action="/logout">
+              <button type="submit" class="button button-secondary">Log out</button>
+            </form>
+          </div>
+        </header>
+
+        <% if (flash) { %>
+          <div class="flash flash-<%= flash.kind %>"><%= flash.message %></div>
+        <% } %>
+
+        <article class="note-view card-block">
+          <div class="note-view__head">
+            <div>
+              <p class="eyebrow"><%= noteOwnershipLabel %></p>
+              <h2><%= noteDateLabel %></h2>
+              <p class="status-line"><%= noteStatus %></p>
+            </div>
+
+            <div class="note-view__actions">
+              <a href="<%= backHref %>" class="button button-secondary">Back to notes</a>
+              <a href="<%= editHref %>" class="button button-secondary">Edit note</a>
+            </div>
+          </div>
+
+          <div class="note-body markdown-body"><%- noteHtml %></div>
+        </article>
+      </main>
+    </div>
+  </body>
+</html>
