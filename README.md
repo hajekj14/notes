@@ -14,6 +14,7 @@ Pocket Notes is a small server-rendered daily notes app built for constrained br
 - The editor includes a no-JavaScript Markdown help modal with basic syntax examples.
 - Admin-only user registration and admin role management.
 - Admins can download a fresh SQLite snapshot from the Admin page.
+- Failed sign-in attempts are rate limited to slow password guessing.
 - Users can change their own password from the Profile page.
 - Responsive Flexbox layout aimed at narrow screens and e-ink readers.
 - Docker setup with one mounted runtime directory.
@@ -85,6 +86,8 @@ The container uses one mount:
 That one mount holds the SQLite database and the sync config.
 
 The default container port is `3000`. Override the host port with the `PORT` environment variable.
+
+Failed-login protection defaults to 8 bad sign-in attempts per 15 minutes for each client IP. Override that with `LOGIN_RATE_LIMIT_MAX_ATTEMPTS` and `LOGIN_RATE_LIMIT_WINDOW_SECONDS` if needed.
 
 ## Google Drive Backup With rclone
 

@@ -9,6 +9,8 @@ services:
       NOTES_DATA_ROOT: /app/runtime-data
       SESSION_SECRET: ${SESSION_SECRET:-replace-this-secret}
       SESSION_SECURE: ${SESSION_SECURE:-false}
+      LOGIN_RATE_LIMIT_MAX_ATTEMPTS: ${LOGIN_RATE_LIMIT_MAX_ATTEMPTS:-8}
+      LOGIN_RATE_LIMIT_WINDOW_SECONDS: ${LOGIN_RATE_LIMIT_WINDOW_SECONDS:-900}
     volumes:
       - ./runtime-data:/app/runtime-data
     restart: unless-stopped
