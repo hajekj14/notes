@@ -95,10 +95,10 @@ Snapshot exports default to every 15 minutes and keep the newest 14 files. Overr
 ## Google Drive Backup With Duplicati
 
 1. Set a Duplicati web UI password with `DUPLICATI_WEBSERVICE_PASSWORD` and a settings encryption key with `DUPLICATI_SETTINGS_ENCRYPTION_KEY`.
-2. Start the backup profile:
+2. Start the stack:
 
 ```bash
-docker compose --profile backup up -d
+docker compose up -d
 ```
 
 3. Open the Duplicati web UI at `http://localhost:8200` or your `DUPLICATI_PORT` override.

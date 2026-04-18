@@ -32,8 +32,6 @@ services:
   backup-snapshot:
     build:
       context: .
-    profiles:
-      - backup
     depends_on:
       app:
         condition: service_healthy
@@ -48,8 +46,6 @@ services:
 
   duplicati:
     image: lscr.io/linuxserver/duplicati:latest
-    profiles:
-      - backup
     depends_on:
       app:
         condition: service_healthy
